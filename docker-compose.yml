@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  server:
+    container_name: server
+    build: ./server
+    command: npm run dev
+    restart: unless-stopped
+    env_file:
+      - ./server/server.env
+    ports:
+      - 5000:5000
+    volumes:
+      - ./server:/app
+    stdin_open: true
+    tty: true
+    depends_on:
+      - mysql_db
+  mysql_db:
+    container_name: mysql_db
+    image: mysql:5.7
+    restart: unless-stopped
+    env_file:
+      - ./server/db.env
+    ports:
+      - 3306:3306
+    volumes:
+      - db:/var/lib/mysql
+    stdin_open: true
+    tty: true
+  frontend:
+    container_name: frontend
+    build: ./client
+    command: npm start
+    ports:
+      - 3000:3000
+    volumes:
+      - ./client:/app
+    stdin_open: true
+    tty: true
+    environment:
+      - WATCHPACK_POLLING=true
+    depends_on:
+      - server
+volumes:
+  db:
